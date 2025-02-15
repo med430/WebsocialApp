@@ -1,0 +1,110 @@
+{% extends 'media/layout.html' %}
+
+{%  block title  %}
+    {{  username  }}
+{%  endblock  %}
+
+{%  block js_code  %}
+    <meta id="csrf-token" content="{{  csrf_token  }}">
+
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const avatar_container = document.querySelector('.avatar_container');
+            const bio_container = document.querySelector('.bio_container');
+            const username = document.querySelector('#username');
+            const bio = document.querySelector('#bio');
+            const dropDownMenu = document.querySelector('#dropDownMenu');
+            let upload_avatar = document.querySelector('#change');
+            let avatar_history = document.querySelector('#history');
+            let fileInput = document.querySelector('#fileInput');
+            let submit = document.querySelector('#submit');
+            let image = document.createElement('img');
+            fetch("/api/profile/{{  user_id  }}")
+            .then(response => response.json())
+            .then(profiles => {
+                let profile = profiles[0];
+                fetch("/api/profile/avatars/{{  user_id  }}")
+                .then(response => response.json())
+                .then(avatars => {
+                    if(avatars.count) {
+                        let avatar = avatars.results[0].avatar;
+                        let img_name = avatar.split('/').pop();
+                        image.src = `../../static/images/avatars/${img_name}`;
+                    } else {
+                        image.src = "../../static/images/no_image.png";
+                    }
+                    avatar_container.append(image);
+                    username.innerHTML = profile.username;
+                    bio.innerHTML = profile.bio;
+                })
+                .catch(error => {
+                    image.src = "../../static/images/no_image.png";
+                    avatar_container.append(image);
+                    username.innerHTML = profile.username;
+                    bio.innerHTML = profile.bio;
+                    console.error("error fetching avatar: ", error);
+                });
+            })
+            .catch(error => console.error('Error fetching profile: ', error))
+            
+            image.addEventListener('click', event => {
+                
+                dropDownMenu.style.display = dropDownMenu.style.display!=='none' && dropDownMenu.style.display ? 'none' : 'block';
+                const rect = image.getBoundingClientRect();
+                const rectdrop = dropDownMenu.getBoundingClientRect();
+                dropDownMenu.style.left = `${(rect.left + rect.right)/2 - (rectdrop.right - rectdrop.left)/2}px`;
+                dropDownMenu.style.top = `${rect.bottom}px`;
+
+            })
+
+            document.addEventListener('click', event => {
+                if(!image.contains(event.target) && !dropDownMenu.contains(event.target)) {
+                    dropDownMenu.style.display = 'none';
+                }
+            })
+            
+            fileInput.addEventListener('change', event => {
+                
+                let file = event.target.files[0];
+                if(file) {
+                    submit.click();
+                }
+
+            })
+
+            upload_avatar.addEventListener('click', () => {
+                fileInput.click();
+            })
+
+            avatar_history.addEventListener('click', () => {
+                window.location = "avatars/{{  user_id  }}";
+            })
+
+        })
+
+    </script>
+{%  endblock  %}
+
+{%  block body  %}
+    <div class="container">
+        <div class="avatar_container"></div>
+        <div>
+            <h2 id="username"></h2>
+        </div>
+        <div class="bio_container">
+            <p id="bio"></p>
+        </div>
+    </div>
+    <div id="dropDownMenu">
+        <h4 id="change">Change Profile Photo</h4>
+        <h4 id="history">Profile Photo History</h4>
+    </div>
+    <form action="{% url 'media:user_profile' user_id=user_id %}" method="POST" class="InputForm" enctype="multipart/form-data">
+        {%  csrf_token  %}
+
+        <input type="file" name="avatar" id="fileInput">
+        <input type="submit" id="submit">
+    </form>
+{%  endblock  %}

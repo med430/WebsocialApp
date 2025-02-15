@@ -1,0 +1,20 @@
+{% extends 'user/layout.html' %}
+
+{% block title %}
+    Sign_up
+{% endblock %}
+
+{% block body %}
+    <div class="centered">
+        <form action="{% url 'sign_in:sign_up' %}" method="POST">
+            {% csrf_token %}
+    
+            {{  form  }}
+    
+            <input type="submit" class="b" value="Sign up">
+        </form>
+        {%  if message  %}
+            <h3>{{  message  }}</h3>
+        {%  endif  %}
+    </div>
+{% endblock %}

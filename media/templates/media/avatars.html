@@ -1,0 +1,61 @@
+{% extends 'media/layout.html' %}
+
+{%  block title  %}
+    {{  username  }}
+{%  endblock  %}
+
+{%  block js_code  %}
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const container = document.querySelector("#avatar-container");
+            let nextPageUrl = "/api/profile/avatars/{{  user_id  }}";
+            let IsLoading = false;
+
+            function fetchavatars(url) {
+                if (IsLoading) return;
+                IsLoading = true;
+                fetch(url)
+                .then(response => response.json())
+                .then(avatars => {
+                    nextPageUrl = avatars.next;
+                    avatars.results.forEach(avatar => {
+                        const avatarElt = document.createElement('div');
+                        let imgUrl = avatar.avatar.split('/').pop();
+                        console.log(imgUrl);
+                        let image = document.createElement('img');
+                        let creation_date = document.createElement('p');
+                        image.src = `/static/images/avatars/${imgUrl}`;
+                        creation_date.innerHTML = `Created at: ${new Date(avatar.creation_date).toLocaleString()}`;
+                        avatarElt.append(image);
+                        avatarElt.append(creation_date);
+                        
+                        container.append(avatarElt);
+                    });
+                    IsLoading = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching posts: ', error);
+                    IsLoading = false;
+                });
+            }
+            
+            fetchavatars(nextPageUrl);
+
+            document.addEventListener('scroll', () => {
+                if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                    if(nextPageUrl) {
+                        fetchavatars(nextPageUrl);
+                    }
+                }
+            });
+
+        })
+
+    </script>
+{%  endblock  %}
+
+{%  block body  %}
+    <div class="centered" id="avatar-container"></div>
+{%  endblock  %}

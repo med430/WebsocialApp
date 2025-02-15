@@ -1,0 +1,255 @@
+{% extends 'media/layout.html' %}
+
+{%  block title  %}
+    {{  username  }}
+{%  endblock  %}
+
+{%  block js_code  %}
+    <meta id="csrf-token" content="{{  csrf_token  }}">
+
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const container = document.querySelector("#post-container");
+            const likes_container = document.querySelector("#likes-container");
+            const comments_container = document.querySelector("#comments-container");
+            let nextPageUrl = "/api/posts/{{  user_id  }}";
+            let nextLikeUrl;
+            let nextCommentUrl;
+            const csrf_token = document.querySelector('#csrf-token').getAttribute('content');
+            let IsLoading = false;
+            let IsLoadingLikes = false;
+            let IsLoadingComments = false;
+
+            function fetchposts(url) {
+                if (IsLoading) return;
+                IsLoading = true;
+                fetch(url)
+                .then(response => response.json())
+                .then(posts => {
+                    nextPageUrl = posts.next;
+                    posts.results.forEach(post => {
+                        const postElt = document.createElement('div');
+                        let isLiked = post.liked_by_user;
+                        
+                        if(post.image===null){
+                            postElt.innerHTML = `
+                            <h2>${post.username}</h2>
+                            <p>${post.text}</p>
+                            <p>Created at: ${new Date(post.creation_date).toLocaleString()}</p>
+                            <h3 id="${post.id}">${post.likes_number} likes</h3>
+                            <div>
+                                <button class="like-button">
+                                    <img src="../../static/images/heart.png" alt="like"></img>    
+                                </button>
+                                <button class="comment-button">
+                                    <img src="../../static/images/comment.png" alt="comment">    
+                                </button>    
+                            </div>
+                            `;
+                        } else {
+                            let imgUrl = post.image.split('/').pop();
+                            console.log(imgUrl);
+                            postElt.innerHTML = `
+                            <h2>${post.username}</h2>
+                            <p>${post.text}</p>
+                            <img src="../../static/images/posts/${imgUrl}" alt="Post Image" style="max-width: 100%">
+                            <p>Created at: ${new Date(post.creation_date).toLocaleString()}</p>
+                            <h3 id="${post.id}">${post.likes_number} likes</h3>
+                            <div>
+                                <button class="like-button">
+                                    <img src="../../static/images/heart.png" alt="like">   
+                                </button>
+                                <button class="comment-button">
+                                    <img src="../../static/images/comment.png" alt="comment">    
+                                </button>    
+                            </div>
+                            `;
+                        }
+                        container.append(postElt);
+                        postElt.className = 'post';
+                        const like_button = postElt.querySelector('.like-button');
+                        like_button.querySelector('img').src = isLiked ? "../../static/images/heart_like.png" : "../../static/images/heart.png";
+                        like_button.addEventListener('click', () => {
+                            const postId = post.id;
+                            let url = isLiked ? `/api/likes-posts/unlike/${postId}` : `/api/likes-posts/like/${postId}`;
+                            fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrf_token
+                                }
+                            })
+                            .then(response => {
+                                if(response.ok) {
+                                    console.log(response.json());
+                                    isLiked = !isLiked;
+                                    like_button.querySelector('img').src = isLiked ? "../../static/images/heart_like.png" : "../../static/images/heart.png";
+                                } else {
+                                    console.log(response.json());
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error toggling like: ', error);
+                            });
+                        });
+
+                        function clearlikes() {
+                            while(likes_container.firstChild) {
+                                likes_container.firstChild.remove();
+                            }
+                        }
+                        
+                        let likes_comments = document.getElementById(`${post.id}`);
+
+                        setInterval(() => {
+                            fetch(`/api/likes/${post.id}`)
+                            .then(response => response.json())
+                            .then(likes => likes_comments.innerHTML = `${likes.count} likes`)
+                        }, 500);
+
+                        likes_comments.onclick = () => {
+                            clearlikes();
+                            likes_container.parentElement.style.display = 'block';
+                            nextLikeUrl = `/api/likes/${post.id}`;
+                            fetchlikes(nextLikeUrl);
+                        }
+
+                        function clearcomments() {
+                            while(comments_container.firstChild) {
+                                comments_container.firstChild.remove();
+                            }
+                            comments_container.parentElement.lastChild.remove();
+                        }
+
+                        postElt.querySelector('.comment-button').addEventListener('click', function comments_getting() {
+                            clearcomments();
+                            let comment_field = document.createElement('div');
+                            comment_field.className = 'comment-field';
+                            comment_field.innerHTML = `
+                            <form>
+                                {%  csrf_token  %}
+
+                                <textarea class="scroll-box" name="content" placeholder="Comment Here!"></textarea>
+                                <input type="submit" value="Send comment">
+                            </form>
+                            `;
+                            comments_container.parentElement.append(comment_field);
+                            comments_container.parentElement.style.display = 'block';
+                            comment_field.querySelector('form').addEventListener('submit', event => {
+                                event.preventDefault()
+                                const formData = new FormData(event.target);
+                                fetch(`/api/comments/${post.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-type': 'application/json',
+                                        'X-CSRFToken': csrf_token
+                                    },
+                                    body: JSON.stringify({content: formData.get('content')})
+                                })
+                                .then(response => response.json())
+                                .then(data => console.log(data))
+                                .catch(error => console.error('Error: ', error));
+                                setTimeout(comments_getting(), 100);
+                            })
+                            nextCommentUrl = `/api/all-comments/${post.id}`;
+                            fetchcomments(nextCommentUrl);
+                        })
+                    });
+                    IsLoading = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching posts: ', error);
+                    IsLoading = false;
+                });
+            }
+
+            document.querySelectorAll('.cross_icon').forEach(c => {
+                c.onclick = () => c.parentElement.style.display = 'none';
+            });
+            
+            fetchposts(nextPageUrl);
+
+            function fetchlikes(url) {
+                        if(IsLoadingLikes) return;
+                        IsLoadingLikes = true;
+                        fetch(url)
+                        .then(response => response.json())
+                        .then(likes => {
+                            nextLikeUrl = likes.next;
+                            likes.results.forEach(like => {
+                                const like_user = document.createElement('h3');
+                                like_user.innerHTML = like.username;
+                                likes_container.append(like_user);
+                            })
+                            IsLoadingLikes = false;
+                        })
+                        .catch(error => {
+                            console.error('error fetching likes: ', error);
+                            IsLoadingLikes = false;
+                        });
+                    }
+                    function fetchcomments(url) {
+                        if(IsLoadingComments) return;
+                        IsLoadingComments = true;
+                        fetch(url)
+                        .then(response => response.json())
+                        .then(comments => {
+                            nextCommentUrl = comments.next;
+                            comments.results.forEach(comment => {
+                                let commentElt = document.createElement('div');
+                                commentElt.innerHTML = `
+                                <h2>${comment.username}</h2>
+                                <p>${comment.content}</p>
+                                <p>Created at: ${new Date(comment.creation_date).toLocaleString()}</p>
+                                `;
+                                commentElt.className = 'comment';
+                                comments_container.append(commentElt);
+                            })
+                            IsLoadingComments = false;
+                        })
+                        .catch(error => {
+                            console.error('error fetching comments: ', error);
+                            IsLoadingComments = false;
+                        })
+                    }
+                    likes_container.parentElement.onscroll = () => {
+                        if(likes_container.parentElement.scrollTop + likes_container.parentElement.clientHeight >= 0.9 * likes_container.parentElement.scrollHeight) {
+                            if(nextLikeUrl) {
+                                fetchlikes(nextLikeUrl);
+                            }
+                        }
+                    }
+                    comments_container.parentElement.onscroll = () => {
+                        if(comments_container.parentElement.scrollTop + comments_container.parentElement.clientHeight >= comments_container.parentElement.scrollHeight) {
+                            if(nextCommentUrl) {
+                                fetchcomments(nextCommentUrl);
+                            }
+                        }
+                    }
+
+            document.addEventListener('scroll', () => {
+                if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                    if(nextPageUrl) {
+                        fetchposts(nextPageUrl);
+                    }
+                }
+            });
+
+        })
+
+    </script>
+{%  endblock  %}
+
+{%  block body  %}
+    <div class="likes">
+        <img src="../../static/images/cross_icon.jpg" id="cross_1" class="cross_icon">
+        <div id="likes-container"></div>
+    </div>
+    <div class="right-sided">
+        <img src="../../static/images/cross_icon.jpg" id="cross_2" class="cross_icon">
+        <div id="comments-container"></div>
+    </div>
+    <div class="centered" id="post-container"></div>
+{%  endblock  %}

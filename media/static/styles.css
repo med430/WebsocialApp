@@ -1,0 +1,178 @@
+body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%239C92AC' fill-opacity='0.25' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(to right top, #343a40, #2b2c31, #211f22, #151314, #000000);
+}
+
+.left-sided {
+    width: 30%;
+    height: 40%;
+    background-color: white;
+    border: 1px solid black;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.right-sided {
+    width: 30%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid black;
+    position: fixed;
+    overflow: auto;
+    resize: none;
+    top: 0;
+    right: 0;
+    display: none;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.centered {
+    width: 20%;
+    height: max-content;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: black;
+    position: relative;
+    top: 0;
+    left: 50%;
+    padding: 20px;
+    transform: translate(-50%, 0%);
+    transition: 1s;
+}
+
+#avatar-container {
+    width: max-content;
+    background-color: white;
+}
+
+#avatar-container div img {
+    width: 200px;
+}
+
+.container {
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.avatar_container img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#username {
+    color: white;
+}
+
+#dropDownMenu {
+    width: max-content;
+    height: max-content;
+    display: none;
+    background-color: white;
+    position: absolute;
+    padding: 0;
+}
+
+#dropDownMenu h4 {
+    border: thin solid black;
+    padding: 10px;
+    margin: 0;
+}
+
+#dropDownMenu h4:hover {
+    background-color: lightgray;
+}
+
+.InputForm {
+    display: none;
+}
+
+.scroll-box {
+    width: 100%;
+    height: 100px;
+    overflow: scroll;
+}
+
+.centered-heading {
+    color: blue;
+    text-align: center;
+}
+
+.post {
+    width: 300px;
+    height: max-content;
+    background-color: white;
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    padding: 10px;
+    margin: 20px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.comment {
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px;
+}
+
+.comment-field {
+    bottom: 0;
+    position: relative;
+}
+
+.likes {
+    width: 30%;
+    height: 40%;
+    top: 50%;
+    left: 0;
+    display: none;
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    overflow: auto;
+    resize: none;
+    position: fixed;
+    border: 1px solid black;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cross_icon {
+    width: 40px;
+    height: 40px;
+    left: 90%;
+    position: relative;
+}
+
+.comment-button {
+    padding: 0;
+    width: 49%;
+    height: 50px;
+    display: inline;
+    background: transparent;
+}
+
+.comment-button img {
+    width: 50px;
+    height: 50px;
+}
+
+.like-button {
+    padding: 0;
+    width: 49%;
+    height: 50px;
+    display: inline;
+    background: transparent;
+}
+
+.like-button img {
+    width: 50px;
+    height: 50px;
+}

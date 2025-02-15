@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            {% block title %}
+
+            {% endblock %}
+        </title>
+        
+        <style>
+            @keyframes bg-animation {
+                0% {
+                    background-position: 0% 50%;
+                }
+
+                50% {
+                    background-position: 100% 50%;
+                }
+
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+            
+            body {
+                background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+                background-size: 400% 400%;
+                background-position: left;
+                animation: bg-animation 15s ease infinite;
+                
+            }
+
+            .redirect-button {
+                width: 30px;
+                height: 10px;
+                left: 10%;
+                top: 50%;
+                position: fixed;
+            }
+
+            .redirect-buttonposts {
+                width: 30px;
+                height: 10px;
+                right: 10%;
+                top: 50%;
+                position: fixed;
+            }
+
+            .centered {
+                width: max-content;
+                height: max-content;
+                background-color: regba(0, 0, 0, 0);
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                padding: 20px;
+                transform: translate(-50%, -50%);
+                transition: 1s;
+            }
+
+            .centered:hover {
+                transform: translate(-50%, -50%) scale(1.25);
+            }
+
+            .b {
+                position: relative;
+                left: 50%;
+                transform: translate(-50%, 0%);
+                text-align: center;
+                border: 0;
+                transition: 0.3s;
+            }
+            
+            .b:hover {
+                transform: translate(-50%, 0%) scale(1.5, 1.25);
+            }
+        </style>
+
+        {%  block js_code  %}
+
+        {%  endblock  %}
+        
+    </head>
+    <body>
+        {% block body %}
+
+        {% endblock %}
+    </body>
+</html>

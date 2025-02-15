@@ -1,0 +1,26 @@
+{% extends 'user/layout.html' %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block body %}
+    <div class="centered">
+        <div>
+            <form action="{% url 'sign_in:login' %}" method="POST">
+                {% csrf_token %}
+        
+                <input type="text" placeholder="Username" name="username">
+                <input type="password" placeholder="Password" name="password">
+                <input type="submit" value="Login">
+            </form>
+            {% if message %}
+                <h4>{{  message  }}</h4>
+            {% endif %}
+        </div>
+        <div>
+            <h3 style="display: inline-block">Not signed up yet? sign up here: </h3>
+            <a href="{% url 'sign_in:sign_up' %}" style="display: inline-block"><h3>Sign Up</h3></a>
+        </div>
+    </div>
+{% endblock %}

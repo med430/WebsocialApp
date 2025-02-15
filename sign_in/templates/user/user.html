@@ -1,0 +1,44 @@
+{% extends 'user/layout.html' %}
+
+{%  block title %}
+    User
+{% endblock %}
+
+{%  block body %}
+    <div class="centered">
+        <div><h1>User</h1></div>
+        <div>
+            <div>
+                <h3 style="display: inline-block">Username:</h3>
+                <h4 style="display: inline-block">{{  username  }}</h4>
+            </div>
+            <div>
+                <h3 style="display: inline-block">Email:</h3>
+                <h4 style="display: inline-block">
+                    {%  if email %}
+
+                        {{  email  }}
+                    
+                    {% else %}
+
+                        Unknown email.
+                        
+                    {%  endif  %}
+                </h4>
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'sign_in:logout' %}">
+                <button class="b">
+                    Logout
+                </button>
+            </a>
+        </div>
+    </div>
+    <a href="{% url 'media:index'%}" class="redirect-button">
+        <button>Posts</button>
+    </a>
+    <a href="{% url 'media:user_posts' user_id=user_id %}" class="redirect-buttonposts" style="right: 10%">
+        <button>personal posts</button>
+    </a>
+{%  endblock %}
